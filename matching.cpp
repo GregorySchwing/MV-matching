@@ -317,11 +317,24 @@ void mvMatching() {
 int32_t main(){
     ios::sync_with_stdio(false);
     int m;
+
+    /*
     cin >> n >> m;
+    */
+    FILE *f;
+    if ((f = fopen("roadNet-PA.mtx", "r")) == NULL){
+        exit(1);
+    }
+    int nz;
+    int num_items_read = fscanf(f, "%d %d %d", &n, &n, &m); 
+    printf("N=%d M=%d\n",n,m);
     graph.resize(n);
     for(int i=0;i<m;i++) {
         int a,b;
-        cin >> a >> b;
+        fscanf(f, "%u%u", &a, &b);
+        //printf("a=%d b=%d\n",a,b);
+        a--;
+        b--;
         graph[a].push_back(Edge(b, (int)graph[b].size()));
         graph[b].push_back(Edge(a, (int)graph[a].size()-1));
     }
