@@ -229,6 +229,17 @@ bool bfs() {
 
     bool foundPath = false;  
     for(int i=0;i<n && !foundPath;i++) {
+        // This can be performed in parallel
+        // each edge e only belongs to one vertex in the frontier.
+        // The only race condition is if two outgoing edges in the frontier point to the same vertex v.
+        // Then it is possible they would both add themselves to v's predecessors.
+        // Not sure if this is a problem.
+        // If it is, it can be solved by claiming vertices atomically.
+
+        // Since the level is at most reduced to i+1, there are no race conditions due to
+        // order of operations between the if(lvl>=i+1) and else
+
+        // Note: this is a ms-bfs approach since all vertices at the level are grown.
         for(auto u : verticesAtLevel[i]) {
             for(auto& e:graph[u]) {
                 if(e.type == NotScanned && (oddlvl[u] == i) == (mate[u] == e.to)) {
@@ -251,6 +262,8 @@ bool bfs() {
             }
         }
         
+        // This loop should be parallelized using a dynamic worklist.  Bridges should be popped of the stack
+        // and ddfs performed using a copy of the graph.  There is no cooperation between the searchers in this version.
         for(auto b : bridges[2*i+1]) {
             if(removed[bud[b.st]] || removed[bud[b.nd]])
                 continue;
